@@ -70,6 +70,9 @@ namespace vrv {
         
         bool MergeVerses(Verse* v1, Verse* v2, Note* n1, Note* n2, int index);
         
+    private:
+        bool is_safe_merge;
+        
     };
     
 }// namespace vrv
