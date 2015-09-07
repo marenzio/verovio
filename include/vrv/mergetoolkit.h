@@ -50,6 +50,9 @@ namespace vrv {
          */
         bool Merge();
         
+        bool LoadOtherFile(const std::string &filename);
+        
+        
     private:
         /**
          * Changed methods from void to bool
@@ -72,6 +75,10 @@ namespace vrv {
         
     private:
         bool is_safe_merge;
+        
+    protected:
+        Doc m_doc2;
+        
         
     };
     

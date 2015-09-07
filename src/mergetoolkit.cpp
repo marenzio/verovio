@@ -60,7 +60,7 @@ namespace vrv {
                 s2->DetachChild(0);
                 layer_1->m_parent = NULL;
                 layer_2->m_parent = NULL;
-                App* app = new App(EDITORIAL_NOTE);
+                App* app = new App(EDITORIAL_STAFF);
                 Lem* lem = new Lem();
                 lem->AddLayer(layer_1);
                 lem->SetSource("Italian");
@@ -143,7 +143,7 @@ namespace vrv {
     {
         if (n1->GetActualDur() == n2->GetActualDur() &&
             n1->GetDiatonicPitch() == n2->GetDiatonicPitch()) {
-            if (n1->m_children.size() > 0 && n1->m_children.size() > 0) {
+            if (n1->m_children.size() > 0 && n2->m_children.size() > 0) {
                 Verse* verse_1 = dynamic_cast<Verse*>(n1->m_children.front());
                 Verse* verse_2 = dynamic_cast<Verse*>(n2->m_children.front());
                 if (verse_1 != NULL && verse_2 != NULL) {
@@ -206,38 +206,112 @@ namespace vrv {
     }
     
     
+    
     bool MergeToolkit::Merge()
     {
         int pageNo = 0;
         // Since we do no layout, we have only one page with one system
         Page* current_page = dynamic_cast<Page*>((&m_doc)->GetChild(pageNo));
-        ArrayOfObjects systems = current_page->m_children;
-        for (int i = 0; i < systems.size(); i++) {
-            System* current_system = dynamic_cast<System*>(systems.at(i));
-            ArrayOfObjects measures = current_system->m_children;
-            for(int j = 0; j < measures.size(); j++) {
-                // for now assume two voices/staffs
-                Measure* current_measure = dynamic_cast<Measure*>(measures.at(j));
-                ArrayOfObjects staffs = current_measure->m_children;
-                Staff* staff_1 = dynamic_cast<Staff*>(staffs.at(0));
-                Staff* staff_2 = dynamic_cast<Staff*>(staffs.at(1));
-                // is_safe_merge checks whether it is safe to merge the lyrics of the whole measure
-                // if it is, then the <app> will be added around the lyrics
-                // otherwise, the <app> will be added around the whole layer and not the lyrics
-                is_safe_merge = false;
-                if (MergeStaffs(staff_1, staff_2)) {
-                    is_safe_merge = true;
-                    MergeStaffs(staff_1, staff_2);
+        Page* current_page2 = dynamic_cast<Page*>((&m_doc2)->GetChild(pageNo));
+        ArrayOfObjects systems1 = current_page->m_children;
+        ArrayOfObjects systems2 = current_page2->m_children;
+        if (systems1.size() != systems2.size()) {
+            return false;
+        }
+        for (int i = 0; i < systems1.size(); i++) {
+            System* current_system1 = dynamic_cast<System*>(systems1.at(i));
+            System* current_system2 = dynamic_cast<System*>(systems2.at(i));
+
+            ArrayOfObjects measures1 = current_system1->m_children;
+            ArrayOfObjects measures2 = current_system2->m_children;
+            if (measures1.size() != measures2.size()) {
+                return false;
+            }
+            for(int j = 0; j < measures1.size(); j++) {
+                Measure* current_measure1 = dynamic_cast<Measure*>(measures1.at(j));
+                Measure* current_measure2 = dynamic_cast<Measure*>(measures2.at(j));
+                if (current_measure1 == NULL && current_measure2 == NULL) {
                 }
-                is_safe_merge = false;
-                staff_2->m_parent = NULL;
-                current_measure->DetachChild(1);
+                else {
+                    ArrayOfObjects staffs1 = current_measure1->m_children;
+                    ArrayOfObjects staffs2 = current_measure2->m_children;
+                    if (staffs1.size() != staffs2.size()) {
+                        return false;
+                    }
+                    for (int k = 0; k < staffs1.size(); k++) {
+                        Staff* staff_1 = dynamic_cast<Staff*>(staffs1.at(k));
+                        Staff* staff_2 = dynamic_cast<Staff*>(staffs2.at(k));
+                        // is_safe_merge checks whether it is safe to merge the lyrics of the whole measure
+                        // if it is, then the <app> will be added around the lyrics
+                        // otherwise, the <app> will be added around the whole layer and not the lyrics
+                        is_safe_merge = false;
+                        if (MergeStaffs(staff_1, staff_2)) {
+                            is_safe_merge = true;
+                            MergeStaffs(staff_1, staff_2);
+                        }
+                        is_safe_merge = false;
+                    }
+                }
             }
         }
-        // need to remove 2nd staff from scoredef
-        StaffGrp* staffgrp_layer1 = dynamic_cast<StaffGrp*>(m_doc.m_scoreDef.m_children.at(0));
-        StaffGrp* staffgrp_layer2 = dynamic_cast<StaffGrp*>(staffgrp_layer1->m_children.at(0));
-        staffgrp_layer2->RemoveChildAt(1);
         return true;
+    }
+    
+    // identical to toolkit's load file, but must initialize another doc variable
+    bool MergeToolkit::LoadOtherFile(const std::string &filename)
+    {
+        if ( IsUTF16( filename ) ) {
+            return LoadUTF16File( filename );
+        }
+        
+        std::ifstream in( filename.c_str() );
+        if (!in.is_open()) {
+            return false;
+        }
+        
+        in.seekg(0, std::ios::end);
+        std::streamsize fileSize = (std::streamsize)in.tellg();
+        in.clear();
+        in.seekg(0, std::ios::beg);
+        
+        // read the file into the string:
+        std::string content( fileSize, 0 );
+        in.read(&content[0], fileSize);
+        
+        
+        FileInputStream *input = NULL;
+        input = new MeiInput( &m_doc2, "" );
+        
+        // something went wrong
+        if ( !input ) {
+            LogError( "Unknown error" );
+            return false;
+        }
+        input->IgnoreLayoutInformation();
+
+        // load the file
+        if ( !input->ImportString( content )) {
+            LogError( "Error importing data" );
+            delete input;
+            return false;
+        }
+        
+        m_doc2.SetPageHeight( this->GetPageHeight() );
+        m_doc2.SetPageWidth( this->GetPageWidth() );
+        m_doc2.SetPageRightMar( this->GetBorder() );
+        m_doc2.SetPageLeftMar( this->GetBorder() );
+        m_doc2.SetPageTopMar( this->GetBorder() );
+        m_doc2.SetSpacingStaff( this->GetSpacingStaff() );
+        m_doc2.SetSpacingSystem( this->GetSpacingSystem() );
+        
+        m_doc2.PrepareDrawing();
+        
+        if (input->HasMeasureWithinEditoMarkup()) {
+            LogWarning( "Only continous layout is possible with <measure> within editorial markup, switching to --no-layout" );
+            this->SetNoLayout( true );
+        }
+        delete input;        
+        return true;
+        
     }
  } //namespace vrv

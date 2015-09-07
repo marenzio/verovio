@@ -143,6 +143,7 @@ int main(int argc, char** argv)
     string outfile;
     string outformat = "svg";
     string font = "";
+    string merge_file;
     bool std_output = false;
     bool is_merge = false;
     
@@ -187,7 +188,7 @@ int main(int argc, char** argv)
         {"format",              required_argument,  0, 'f'},
         {"help",                no_argument,        &show_help, 1},
         {"ignore-layout",       no_argument,        &ignore_layout, 1},
-        {"merge",               no_argument,        0,  0},
+        {"merge",               required_argument,  0,  0},
         {"no-layout",           no_argument,        &no_layout, 1},
         {"no-mei-hdr",          no_argument,        &no_mei_hdr, 1},
         {"no-justification",    no_argument,        &no_justification, 1},
@@ -237,6 +238,7 @@ int main(int argc, char** argv)
                 else
                     if (strcmp(long_options[option_index].name,"merge") == 0) {
                         is_merge = true;
+                        merge_file = string(optarg);
                     }
                 break;
             case 'b':
@@ -348,11 +350,18 @@ int main(int argc, char** argv)
         else {
             outfile = removeExtension(outfile);
         }
+        infile += ".mei";
         outfile += ".mei";
+        
         
         // Load the file
         if ( !mtoolkit.LoadFile( infile ) ) {
             cerr << "The file '" << infile << "' could not be open" << endl;
+            exit(1);
+        }
+
+        if ( !mtoolkit.LoadOtherFile( merge_file ) ) {
+            cerr << "The file '" << merge_file << "' could not be open" << endl;
             exit(1);
         }
         

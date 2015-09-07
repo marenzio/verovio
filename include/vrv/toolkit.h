@@ -280,7 +280,7 @@ public:
     bool Set( std::string elementId, std::string attrType, std::string attrValue );
     ///@}
 
-private:
+protected:
     bool IsUTF16( const std::string &filename );
     bool LoadUTF16File( const std::string &filename );
     
