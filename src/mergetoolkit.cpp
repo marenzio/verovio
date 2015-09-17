@@ -34,14 +34,40 @@
 namespace vrv {
     
     
-    MergeToolkit::MergeToolkit( bool initFont ):Toolkit(initFont)
+    MergeToolkit::MergeToolkit( bool initFont):Toolkit(initFont)
     {
+        source1 = "source1";
+        source2 = "source2";
         
     }
     
     bool MergeToolkit::MergeMeasures(Measure* m1, Measure* m2)
     {
-            // may be needed for the future
+        if (m1== NULL && m2== NULL) {
+        }
+        else {
+            ArrayOfObjects staffs1 = m1->m_children;
+            ArrayOfObjects staffs2 = m2->m_children;
+            if (staffs1.size() != staffs2.size()) {
+                return false;
+            }
+            for (int k = 0; k < staffs1.size(); k++) {
+                Staff* staff_1 = dynamic_cast<Staff*>(staffs1.at(k));
+                Staff* staff_2 = dynamic_cast<Staff*>(staffs2.at(k));
+                // is_safe_merge checks whether it is safe to merge the lyrics of the whole measure
+                // if it is, then the <app> will be added around the lyrics
+                // otherwise, the <app> will be added around the whole layer and not the lyrics
+                is_safe_merge = false;
+                if (MergeStaffs(staff_1, staff_2)) {
+                    is_safe_merge = true;
+                    MergeStaffs(staff_1, staff_2);
+                }
+                else {
+                    std::cout << StringFormat("Measure %d Staff %d is different.\n", (m1->GetMeasureIdx() + 1), (staff_1->GetStaffIdx() + 1));
+                }
+                is_safe_merge = false;
+            }
+        }
         return true;
     }
 
@@ -63,14 +89,14 @@ namespace vrv {
                 App* app = new App(EDITORIAL_STAFF);
                 Lem* lem = new Lem();
                 lem->AddLayer(layer_1);
-                lem->SetSource("Italian");
+                lem->SetSource(source1);
                 Rdg* rdg = new Rdg();
                 rdg->AddLayer(layer_2);
-                rdg->SetSource("English");
+                rdg->SetSource(source2);
                 app->AddLemOrRdg(lem);
                 app->AddLemOrRdg(rdg);
                 s1->AddEditorialElement(app);
-                return true;
+                return false;
             }
         }
         return true;
@@ -191,10 +217,10 @@ namespace vrv {
             App* app = new App(EDITORIAL_NOTE);
             Lem* lem = new Lem();
             lem->AddLayerElement(v1);
-            lem->SetSource("Italian");
+            lem->SetSource(source1);
             Rdg* rdg = new Rdg();
             rdg->AddLayerElement(v2);
-            rdg->SetSource("English");
+            rdg->SetSource(source2);
             app->AddLemOrRdg(lem);
             app->AddLemOrRdg(rdg);
             n1->AddEditorialElement(app);
@@ -230,28 +256,7 @@ namespace vrv {
             for(int j = 0; j < measures1.size(); j++) {
                 Measure* current_measure1 = dynamic_cast<Measure*>(measures1.at(j));
                 Measure* current_measure2 = dynamic_cast<Measure*>(measures2.at(j));
-                if (current_measure1 == NULL && current_measure2 == NULL) {
-                }
-                else {
-                    ArrayOfObjects staffs1 = current_measure1->m_children;
-                    ArrayOfObjects staffs2 = current_measure2->m_children;
-                    if (staffs1.size() != staffs2.size()) {
-                        return false;
-                    }
-                    for (int k = 0; k < staffs1.size(); k++) {
-                        Staff* staff_1 = dynamic_cast<Staff*>(staffs1.at(k));
-                        Staff* staff_2 = dynamic_cast<Staff*>(staffs2.at(k));
-                        // is_safe_merge checks whether it is safe to merge the lyrics of the whole measure
-                        // if it is, then the <app> will be added around the lyrics
-                        // otherwise, the <app> will be added around the whole layer and not the lyrics
-                        is_safe_merge = false;
-                        if (MergeStaffs(staff_1, staff_2)) {
-                            is_safe_merge = true;
-                            MergeStaffs(staff_1, staff_2);
-                        }
-                        is_safe_merge = false;
-                    }
-                }
+                MergeMeasures(current_measure1, current_measure2);
             }
         }
         return true;
@@ -314,4 +319,15 @@ namespace vrv {
         return true;
         
     }
+    
+    bool MergeToolkit::SetSource1(std::string s1) {
+        source1 = s1;
+        return true;
+    }
+    
+    bool MergeToolkit::SetSource2(std::string s2) {
+        source2 = s2;
+        return true;
+    }
+    
  } //namespace vrv

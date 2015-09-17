@@ -117,6 +117,10 @@ void display_usage() {
 
     cerr << " --merge                    Merge two MEI files into one" << endl;
     
+    cerr << " --source1                  Provide source 1 (original) for merging" << endl;
+    
+    cerr << " --source2                  Provide source 2 for merging" << endl;
+    
     cerr << " --no-layout                Ignore all encoded layout information (if any)" << endl;
     cerr << "                            and output one single page with one single system" << endl;
     
@@ -144,6 +148,8 @@ int main(int argc, char** argv)
     string outformat = "svg";
     string font = "";
     string merge_file;
+    string merge_source_1 = "source1"; //default
+    string merge_source_2 = "source2"; //default
     bool std_output = false;
     bool is_merge = false;
     
@@ -189,6 +195,8 @@ int main(int argc, char** argv)
         {"help",                no_argument,        &show_help, 1},
         {"ignore-layout",       no_argument,        &ignore_layout, 1},
         {"merge",               required_argument,  0,  0},
+        {"source1",             required_argument,  0,  0},
+        {"source2",             required_argument,  0,  0},
         {"no-layout",           no_argument,        &no_layout, 1},
         {"no-mei-hdr",          no_argument,        &no_mei_hdr, 1},
         {"no-justification",    no_argument,        &no_justification, 1},
@@ -239,6 +247,12 @@ int main(int argc, char** argv)
                     if (strcmp(long_options[option_index].name,"merge") == 0) {
                         is_merge = true;
                         merge_file = string(optarg);
+                    }
+                    if (strcmp(long_options[option_index].name,"source1") == 0) {
+                        merge_source_1 = string(optarg);
+                    }
+                    if (strcmp(long_options[option_index].name,"source2") == 0) {
+                        merge_source_2 = string(optarg);
                     }
                 break;
             case 'b':
@@ -310,7 +324,8 @@ int main(int argc, char** argv)
     if (is_merge) {
         // Force no layout with merge (we load everything in one page)
         mtoolkit.SetNoLayout(true);
-        
+        mtoolkit.SetSource1(merge_source_1);
+        mtoolkit.SetSource2(merge_source_2);
         if (optind <= argc - 1) {
             infile = string(argv[optind]);
         }

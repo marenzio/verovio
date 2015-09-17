@@ -51,6 +51,10 @@ namespace vrv {
         bool Merge();
         
         bool LoadOtherFile(const std::string &filename);
+                
+        bool SetSource1(std::string s1);
+        
+        bool SetSource2(std::string s2);
         
         
     private:
@@ -72,9 +76,12 @@ namespace vrv {
         bool MergeRests(Rest* r1, Rest* r2);
         
         bool MergeVerses(Verse* v1, Verse* v2, Note* n1, Note* n2, int index);
+
         
     private:
         bool is_safe_merge;
+        std::string source1;
+        std::string source2;
         
     protected:
         Doc m_doc2;
