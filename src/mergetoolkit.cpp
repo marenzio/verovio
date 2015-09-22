@@ -62,9 +62,6 @@ namespace vrv {
                     is_safe_merge = true;
                     MergeStaffs(staff_1, staff_2);
                 }
-                else {
-                    std::cout << StringFormat("Measure %d Staff %d is different.\n", (m1->GetMeasureIdx() + 1), (staff_1->GetStaffIdx() + 1));
-                }
                 is_safe_merge = false;
             }
         }
@@ -96,6 +93,8 @@ namespace vrv {
                 app->AddLemOrRdg(lem);
                 app->AddLemOrRdg(rdg);
                 s1->AddEditorialElement(app);
+                std::cout << StringFormat("Measure %d Staff %d is different.\n", (s1->m_parent->GetIdx() + 1- offset), (s1->GetStaffIdx() + 1));
+                
                 return false;
             }
         }
@@ -119,6 +118,15 @@ namespace vrv {
 
                     if (!MergeBeams(beam_1, beam_2)) {
                         return false;
+                    }
+                }
+                else {
+                    Rest* rest_1 = dynamic_cast<Rest*>(children_1.at(k));
+                    Rest* rest_2 = dynamic_cast<Rest*>(children_2.at(k));
+                    if (rest_1 != NULL && rest_2 != NULL) {
+                        if(!MergeRests(rest_1, rest_2)) {
+                            return false;
+                        }
                     }
                 }
             }
@@ -146,8 +154,14 @@ namespace vrv {
             Note* note_2 = dynamic_cast<Note*>(b2->m_children.at(k));
             if (note_1 == NULL && note_2 == NULL)
             {
-                if (dynamic_cast<Beam*>(note_1) != NULL && dynamic_cast<Beam*>(note_2) != NULL) {
+                Rest* rest_1 = dynamic_cast<Rest*>(b1->m_children.at(k));
+                Rest* rest_2 = dynamic_cast<Rest*>(b2->m_children.at(k));
+                if (rest_1 != NULL && rest_2 != NULL) {
+                    if(!MergeRests(rest_1, rest_2)) {
+                        return false;
+                    }
                 }
+                
             }
             else if (note_1 == NULL || note_2 == NULL) {
                 // note_1 and note_2 must both not be null, therefore this should not merge and return false
@@ -204,7 +218,12 @@ namespace vrv {
 
     bool MergeToolkit::MergeRests(Rest* r1, Rest* r2)
     {
-        return true;
+        if (r1->GetDur() == r2->GetDur()) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
     
     bool MergeToolkit::MergeVerses(Verse* v1, Verse* v2, Note* n1, Note* n2, int index)
@@ -236,6 +255,7 @@ namespace vrv {
     bool MergeToolkit::Merge()
     {
         int pageNo = 0;
+        offset = 0;
         // Since we do no layout, we have only one page with one system
         Page* current_page = dynamic_cast<Page*>((&m_doc)->GetChild(pageNo));
         Page* current_page2 = dynamic_cast<Page*>((&m_doc2)->GetChild(pageNo));
@@ -256,7 +276,12 @@ namespace vrv {
             for(int j = 0; j < measures1.size(); j++) {
                 Measure* current_measure1 = dynamic_cast<Measure*>(measures1.at(j));
                 Measure* current_measure2 = dynamic_cast<Measure*>(measures2.at(j));
-                MergeMeasures(current_measure1, current_measure2);
+                if (current_measure1 != NULL && current_measure2 != NULL) {
+                    MergeMeasures(current_measure1, current_measure2);
+                }
+                else {
+                    offset = offset + 1;
+                }
             }
         }
         return true;

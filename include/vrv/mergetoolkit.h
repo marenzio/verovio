@@ -83,6 +83,8 @@ namespace vrv {
         std::string source1;
         std::string source2;
         
+        int offset; // this is to figure out how to offset the measure numbers when a scoredef is added
+        
     protected:
         Doc m_doc2;
         
