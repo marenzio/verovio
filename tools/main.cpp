@@ -365,7 +365,6 @@ int main(int argc, char** argv)
         else {
             outfile = removeExtension(outfile);
         }
-        infile += ".mei";
         outfile += ".mei";
         
         

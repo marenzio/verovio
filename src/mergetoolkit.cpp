@@ -291,7 +291,7 @@ namespace vrv {
     bool MergeToolkit::LoadOtherFile(const std::string &filename)
     {
         if ( IsUTF16( filename ) ) {
-            return LoadUTF16File( filename );
+            return LoadOtherUTF16File( filename );
         }
         
         std::ifstream in( filename.c_str() );
@@ -308,7 +308,12 @@ namespace vrv {
         std::string content( fileSize, 0 );
         in.read(&content[0], fileSize);
         
+        return LoadOtherString(content);
         
+    }
+    
+    bool MergeToolkit::LoadOtherString(const std::string &content)
+    {
         FileInputStream *input = NULL;
         input = new MeiInput( &m_doc2, "" );
         
@@ -318,7 +323,7 @@ namespace vrv {
             return false;
         }
         input->IgnoreLayoutInformation();
-
+        
         // load the file
         if ( !input->ImportString( content )) {
             LogError( "Error importing data" );
@@ -340,10 +345,44 @@ namespace vrv {
             LogWarning( "Only continous layout is possible with <measure> within editorial markup, switching to --no-layout" );
             this->SetNoLayout( true );
         }
-        delete input;        
+        delete input;
         return true;
         
     }
+    
+    bool MergeToolkit::LoadOtherUTF16File( const std::string &filename )
+    {
+        /// Loading a UTF-16 file with basic conversion ot UTF-8
+        /// This is called after checking if the file has a UTF-16 BOM
+        
+        LogWarning("The file seems to be UTF-16 - trying to convert to UTF-8");
+        
+        std::ifstream fin(filename.c_str(), std::ios::in | std::ios::binary);
+        if (!fin.is_open()) {
+            return false;
+        }
+        
+        fin.seekg(0, std::ios::end);
+        std::streamsize wfileSize = (std::streamsize)fin.tellg();
+        fin.clear();
+        fin.seekg(0, std::wios::beg);
+        
+        std::vector<unsigned short> utf16line;
+        utf16line.reserve(wfileSize / 2 + 1);
+        
+        unsigned short buffer;
+        while(fin.read((char *)&buffer, sizeof(unsigned short)))
+        {
+            utf16line.push_back(buffer);
+        }
+        //LogDebug("%d %d", wfileSize, utf8line.size());
+        
+        std::string utf8line;
+        utf8::utf16to8(utf16line.begin(), utf16line.end(), back_inserter(utf8line));
+        
+        return LoadOtherString( utf8line );
+    }
+
     
     bool MergeToolkit::SetSource1(std::string s1) {
         source1 = s1;

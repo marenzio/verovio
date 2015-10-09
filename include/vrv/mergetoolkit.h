@@ -50,7 +50,11 @@ namespace vrv {
          */
         bool Merge();
         
+        bool LoadOtherString(const std::string &content);
+        
         bool LoadOtherFile(const std::string &filename);
+        
+        bool LoadOtherUTF16File(const std::string &filename);
                 
         bool SetSource1(std::string s1);
         
