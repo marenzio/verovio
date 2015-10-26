@@ -93,8 +93,10 @@ namespace vrv {
                 app->AddLemOrRdg(lem);
                 app->AddLemOrRdg(rdg);
                 s1->AddEditorialElement(app);
-                std::cout << StringFormat("Measure %d Staff %d is different.\n", (s1->m_parent->GetIdx() + 1- offset), (s1->GetStaffIdx() + 1));
-                
+                std::ofstream outfile;
+                outfile.open("../diff.txt", std::ios::out | std::ios::app);
+                outfile << StringFormat("Measure %d Staff %d is different.\n", (s1->m_parent->GetIdx() + 1- offset), (s1->GetStaffIdx() + 1));
+                outfile.close();
                 return false;
             }
         }
