@@ -365,6 +365,9 @@ int main(int argc, char** argv)
         else {
             outfile = removeExtension(outfile);
         }
+        string temp = outfile;
+        mtoolkit.SetLog(temp);
+        
         outfile += ".mei";
         
         

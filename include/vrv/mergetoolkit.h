@@ -60,6 +60,8 @@ namespace vrv {
         
         bool SetSource2(std::string s2);
         
+        bool SetLog(std::string s);
+        
         
     private:
         /**
@@ -86,6 +88,7 @@ namespace vrv {
         bool is_safe_merge;
         std::string source1;
         std::string source2;
+        std::string log_name;
         
         int offset; // this is to figure out how to offset the measure numbers when a scoredef is added
         

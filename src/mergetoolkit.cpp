@@ -94,7 +94,7 @@ namespace vrv {
                 app->AddLemOrRdg(rdg);
                 s1->AddEditorialElement(app);
                 std::ofstream outfile;
-                outfile.open("../diff.txt", std::ios::out | std::ios::app);
+                outfile.open(log_name.c_str(), std::ios::out | std::ios::app);
                 outfile << StringFormat("Measure %d Staff %d is different.\n", (s1->m_parent->GetIdx() + 1- offset), (s1->GetStaffIdx() + 1));
                 outfile.close();
                 return false;
@@ -393,6 +393,12 @@ namespace vrv {
     
     bool MergeToolkit::SetSource2(std::string s2) {
         source2 = s2;
+        return true;
+    }
+    
+    bool MergeToolkit::SetLog(std::string s) {
+        log_name = s;
+        log_name.append(".txt");
         return true;
     }
     
