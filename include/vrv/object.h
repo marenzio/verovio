@@ -912,6 +912,10 @@ public:
 
     ///@}
 
+    virtual int AccidGesFix(FunctorParams *) { return FUNCTOR_CONTINUE; }
+    
+    
+    
 protected:
     /**
      * Clear the children vector and delete all the objects.

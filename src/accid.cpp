@@ -15,6 +15,7 @@
 
 #include "doc.h"
 #include "functorparams.h"
+#include "measure.h"
 #include "note.h"
 #include "smufl.h"
 #include "vrv.h"
@@ -195,5 +196,69 @@ int Accid::ResetHorizontalAlignment(FunctorParams *functorParams)
 
     return FUNCTOR_CONTINUE;
 }
+
+int Accid::AccidGesFix(FunctorParams *functorParams)
+{
+    AccidGesFixParams *params = dynamic_cast<AccidGesFixParams *>(functorParams);
+    assert(params);
+    
+    Note *note = dynamic_cast<Note*>(this->GetFirstParent(NOTE));
+    assert(note);
+    
+    Measure *measure = dynamic_cast<Measure *>(this->GetFirstParent(MEASURE));
+    assert(measure);
+    
+    if (!this->HasAccid()) {
+        if (!this->HasAccidGes()) LogMessage("Accid without @accid nor @accid.ges (note '%s' measure %d)", note->GetUuid().c_str(), measure->GetN());
+        return FUNCTOR_CONTINUE;
+    }
+    
+    if (this->HasFunc()) {
+        return FUNCTOR_CONTINUE;
+    }
+    
+    // Ties
+    if (note->HasTie() && ((note->GetTie() == TIE_m) || (note->GetTie() == TIE_t))) {
+        if (this->GetAccid() == ACCIDENTAL_EXPLICIT_f)
+            this->SetAccidGes(ACCIDENTAL_IMPLICIT_f);
+        else if (this->GetAccid() == ACCIDENTAL_EXPLICIT_s)
+            this->SetAccidGes(ACCIDENTAL_IMPLICIT_s);
+        else if (this->GetAccid() == ACCIDENTAL_EXPLICIT_n) {
+            this->SetAccidGes(ACCIDENTAL_IMPLICIT_n);
+            params->m_accids[note->GetPname()] = ACCIDENTAL_EXPLICIT_NONE;
+        }
+        else {
+            LogWarning("Unknown accid value (note '%s' measure %d)", note->GetUuid().c_str(), measure->GetN());
+        }
+        this->SetAccid(ACCIDENTAL_EXPLICIT_NONE);
+        
+        LogWarning("Tied note (note '%s' measure %d)", note->GetUuid().c_str(), measure->GetN());
+        
+        return FUNCTOR_CONTINUE;
+    }
+    
+    // Normal cases
+    if (params->m_accids[note->GetPname()] == this->GetAccid()) {
+        if (this->GetAccid() == ACCIDENTAL_EXPLICIT_f)
+            this->SetAccidGes(ACCIDENTAL_IMPLICIT_f);
+        else if (this->GetAccid() == ACCIDENTAL_EXPLICIT_s)
+            this->SetAccidGes(ACCIDENTAL_IMPLICIT_s);
+        else if (this->GetAccid() == ACCIDENTAL_EXPLICIT_n) {
+            this->SetAccidGes(ACCIDENTAL_IMPLICIT_n);
+        }
+        else {
+            LogWarning("Unknown accid value (note '%s' measure %d)", note->GetUuid().c_str(), measure->GetN());
+        }
+        
+        this->SetAccid(ACCIDENTAL_EXPLICIT_NONE);
+        LogWarning("Key sig note (note '%s' measure %d)", note->GetUuid().c_str(), measure->GetN());
+        
+        return FUNCTOR_CONTINUE;
+    }
+
+    
+    return FUNCTOR_CONTINUE;
+}
+
 
 } // namespace vrv

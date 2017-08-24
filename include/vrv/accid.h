@@ -14,6 +14,7 @@
 namespace vrv {
 
 class AlignmentReference;
+class FunctorParams;
 
 //----------------------------------------------------------------------------
 // Accid
@@ -80,6 +81,8 @@ public:
      * See Object::ResetHorizontalAlignment
      */
     virtual int ResetHorizontalAlignment(FunctorParams *functorParams);
+                  
+    virtual int AccidGesFix(FunctorParams *functorParams);
 
 private:
     //

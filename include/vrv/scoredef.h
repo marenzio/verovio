@@ -191,7 +191,9 @@ public:
      * See Object::CastOffEncoding
      */
     virtual int CastOffEncoding(FunctorParams *functorParams);
-
+                                         
+    virtual int AccidGesFix(FunctorParams *functorParams);
+    
 protected:
     /**
      * Filter the list for a specific class.

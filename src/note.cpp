@@ -21,6 +21,7 @@
 #include "functorparams.h"
 #include "glyph.h"
 #include "layer.h"
+#include "measure.h"
 #include "slur.h"
 #include "smufl.h"
 #include "staff.h"
@@ -749,6 +750,31 @@ int Note::ResetHorizontalAlignment(FunctorParams *functorParams)
 
     m_drawingLoc = 0;
     m_flippedNotehead = false;
+
+    return FUNCTOR_CONTINUE;
+}
+
+int Note::AccidGesFix(FunctorParams *functorParams)
+{
+    AccidGesFixParams *params = dynamic_cast<AccidGesFixParams *>(functorParams);
+    assert(params);
+    
+    if (params->m_accids[this->GetPname()] != ACCIDENTAL_EXPLICIT_NONE) {
+        Accid *accid = dynamic_cast<Accid *>(this->FindChildByType(ACCID));
+        if (accid) {
+            return FUNCTOR_CONTINUE;
+        }
+        
+        accid = new Accid();
+        accid->SetAccid(ACCIDENTAL_EXPLICIT_n);
+        this->AddChild(accid);
+        
+        Measure *measure = dynamic_cast<Measure *>(this->GetFirstParent(MEASURE));
+        assert(measure);
+        
+        LogMessage("Adding accid natural to note '%s' measure '%d'", this->GetUuid().c_str(), measure->GetN());
+        
+    }
 
     return FUNCTOR_CONTINUE;
 }

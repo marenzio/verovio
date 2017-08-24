@@ -487,6 +487,13 @@ void Doc::CollectScoreDefs(bool force)
     // LogElapsedTimeStart();
     this->Process(&setCurrentScoreDef, &setCurrentScoreDefParams);
     // LogElapsedTimeEnd ("Setting scoreDefs");
+    
+    
+    AccidGesFixParams accidGesFixParams;
+    Functor accidGesFix(&Object::AccidGesFix);
+    this->Process(&accidGesFix, &accidGesFixParams);
+    
+    m_scoreDef.Process(&accidGesFix, &accidGesFixParams);
 
     m_currentScoreDefDone = true;
 }

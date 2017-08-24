@@ -1279,6 +1279,29 @@ public:
     System *m_currentSystem;
 };
 
+//----------------------------------------------------------------------------
+// AccidGetFixParams
+//----------------------------------------------------------------------------
+
+/**
+ * member 0: a pointer to the system we are adding system to
+**/
+
+class AccidGesFixParams : public FunctorParams {
+public:
+    AccidGesFixParams()
+    {
+        m_accids[PITCHNAME_c] = ACCIDENTAL_EXPLICIT_NONE;
+        m_accids[PITCHNAME_d] = ACCIDENTAL_EXPLICIT_NONE;
+        m_accids[PITCHNAME_e] = ACCIDENTAL_EXPLICIT_NONE;
+        m_accids[PITCHNAME_f] = ACCIDENTAL_EXPLICIT_NONE;
+        m_accids[PITCHNAME_g] = ACCIDENTAL_EXPLICIT_NONE;
+        m_accids[PITCHNAME_a] = ACCIDENTAL_EXPLICIT_NONE;
+        m_accids[PITCHNAME_b] = ACCIDENTAL_EXPLICIT_NONE;
+    }
+    std::map<data_PITCHNAME, data_ACCIDENTAL_EXPLICIT> m_accids;
+};
+
 } // namespace vrv
 
 #endif

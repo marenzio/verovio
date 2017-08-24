@@ -545,6 +545,28 @@ int ScoreDef::CastOffEncoding(FunctorParams *functorParams)
 
     return FUNCTOR_SIBLINGS;
 }
+    
+    
+int ScoreDef::AccidGesFix(FunctorParams *functorParams)
+{
+    AccidGesFixParams *params = dynamic_cast<AccidGesFixParams *>(functorParams);
+    assert(params);
+    
+    if ((this->GetMeterUnit() == 4) && (this->GetMeterCount() == 4)) {
+        this->SetMeterUnit(0);
+        this->SetMeterCount(0);
+        this->SetMeterSym(METERSIGN_common);
+        LogMessage("Replacing 4/4 by c");
+    }
+    else if ((this->GetMeterUnit() == 2) && (this->GetMeterCount() == 2)) {
+        this->SetMeterUnit(0);
+        this->SetMeterCount(0);
+        this->SetMeterSym(METERSIGN_cut);
+        LogMessage("Replacing 2/2 by c/");
+    }
+
+    return FUNCTOR_CONTINUE;
+}
 
 //----------------------------------------------------------------------------
 // StaffDef functor methods

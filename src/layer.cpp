@@ -435,5 +435,22 @@ int Layer::CalcMaxMeasureDuration(FunctorParams *functorParams)
 
     return FUNCTOR_CONTINUE;
 }
+    
+int Layer::AccidGesFix(FunctorParams *functorParams)
+{
+    AccidGesFixParams *params = dynamic_cast<AccidGesFixParams *>(functorParams);
+    assert(params);
+    
+    KeySig *keySig = GetCurrentKeySig();
+    
+    // reset it
+    std::map<data_PITCHNAME, data_ACCIDENTAL_EXPLICIT>::iterator iter;
+    for (iter = params->m_accids.begin(); iter != params->m_accids.end(); iter++) {
+        params->m_accids[iter->first] = (keySig) ? keySig->GetAccidForPitch(iter->first) : ACCIDENTAL_EXPLICIT_NONE;
+    }
+    
+    return FUNCTOR_CONTINUE;
+}
 
+    
 } // namespace vrv

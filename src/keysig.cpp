@@ -184,6 +184,22 @@ data_KEYSIGNATURE KeySig::ConvertToKeySigLog()
     return (data_KEYSIGNATURE)(key + KEYSIGNATURE_0);
 }
 
+data_ACCIDENTAL_EXPLICIT KeySig::GetAccidForPitch(data_PITCHNAME pname)
+{
+    int i;
+    if (m_alterationType == ACCIDENTAL_EXPLICIT_s) {
+        for (i = 0; i < m_alterationNumber; i++) {
+            if (KeySig::sharps[i] == pname) return ACCIDENTAL_EXPLICIT_s;
+        }
+    }
+    else {
+        for (i = 0; i < m_alterationNumber; i++) {
+            if (KeySig::flats[i] == pname) return ACCIDENTAL_EXPLICIT_f;
+        }
+    }
+    return ACCIDENTAL_EXPLICIT_NONE;
+}
+    
 //----------------------------------------------------------------------------
 // Static methods
 //----------------------------------------------------------------------------

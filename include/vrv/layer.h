@@ -167,6 +167,8 @@ public:
      * See Object::CalcMaxMeasureDuration
      */
     virtual int CalcMaxMeasureDuration(FunctorParams *functorParams);
+                  
+    virtual int AccidGesFix(FunctorParams *functorParams);
 
 private:
     //

@@ -556,6 +556,8 @@ bool Toolkit::LoadData(const std::string &data)
 
     delete input;
     m_view.SetDoc(&m_doc);
+    
+    m_doc.CollectScoreDefs();
 
     return true;
 }

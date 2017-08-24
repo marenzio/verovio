@@ -66,6 +66,8 @@ public:
 
     /* Convert to KeySigLog */
     data_KEYSIGNATURE ConvertToKeySigLog();
+    
+    data_ACCIDENTAL_EXPLICIT GetAccidForPitch(data_PITCHNAME pname);
 
     /**
      * Static methods for calculating position;
